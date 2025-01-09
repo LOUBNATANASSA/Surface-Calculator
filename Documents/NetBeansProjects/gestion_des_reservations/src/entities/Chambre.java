@@ -5,12 +5,12 @@ public class Chambre {
 	private String numero;
 	private String telephone;
 	Categorie categorie;
-	private static int ccham=6;
+	//private static int ccham=6;
 	
 
 	public Chambre(String numero,String telephone, Categorie categorie) {
 		super();
-		this.id = ccham++;
+		this.id = id;
 		this.numero=numero;
 		this.telephone = telephone;
 		this.categorie = categorie;
@@ -19,7 +19,7 @@ public class Chambre {
 	
 	public Chambre(int id,String numero, String telephone, Categorie categorie) {
 		super();
-		this.id = ccham++;
+		this.id = id;
 		this.numero=numero;
 		this.telephone = telephone;
 		this.categorie = categorie;

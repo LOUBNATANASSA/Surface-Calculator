@@ -3,13 +3,27 @@ package entities;
 import java.sql.Date;
 
 public class Reservation {
+        private int id;
 	private Date datedebut;
 	private Date datefin;
 	Chambre chambre;
 	Client client;
+        
+        public Reservation() {
+    // Constructeur par défaut vide
+}
 
-	public Reservation(Date datedebut, Date datefin, Chambre chambre, Client client) {
+	public Reservation(int id,Date datedebut, Date datefin, Chambre chambre, Client client) {
 		super();
+                this.id = id;
+		this.datedebut = datedebut;
+		this.datefin = datefin;
+		this.chambre = chambre;
+		this.client = client;
+	}
+        public Reservation(Date datedebut, Date datefin, Chambre chambre, Client client) {
+		super();
+                this.id = id;
 		this.datedebut = datedebut;
 		this.datefin = datefin;
 		this.chambre = chambre;
@@ -30,6 +44,14 @@ public class Reservation {
 
 	public void setDatefin(Date datefin) {
 		this.datefin = datefin;
+	}
+        
+        public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public Chambre getChambre() {

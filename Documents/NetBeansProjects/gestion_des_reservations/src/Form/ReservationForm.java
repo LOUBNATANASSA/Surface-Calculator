@@ -11,8 +11,9 @@ import services.reservationservice;
 import entities.Reservation;
 import javax.swing.JOptionPane;
 import java.util.List;
-
-
+import javax.swing.table.DefaultTableModel;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 /**
  *
  * @author hp
@@ -27,26 +28,50 @@ public class ReservationForm extends javax.swing.JInternalFrame {
  private clientservice client=new clientservice();
  private List<Client> b=client.findAll();
  
- private clientservice rs;
+ private reservationservice rs;
+ private DefaultTableModel model;
+ private static int id;
+        
     
  
     public ReservationForm() {
         initComponents();
-        rs=new clientservice();
+        rs=new reservationservice();
+        
+        remplirChambreBox() ;
+        remplirClientBox();
+        model=(DefaultTableModel) listereservation.getModel();
+        load();
+        
+    }
+    
+    public void load(){
+        model.setRowCount(0);
+        for(Reservation ch:rs.findAll()){
+            model.addRow(new Object[] {
+                ch.getId(),
+                ch.getDatedebut(),
+                ch.getDatefin(),
+                ch.getChambre().getnumero(),
+                ch.getClient().getCIN()
+
+            });
+            
+        }
     }
     
     /////la liste des chambres
         private void remplirChambreBox() {
         try {
             // Utilisation de chambreservice pour récupérer les catégories
-            chambreservice x=new chambreservice();
-            List<Chambre> chambres = x.findAll(); // Implémentez cette méthode dans chambreservice
+            //chambreservice x=new chambreservice();
+            //List<Chambre> chambres = x.findAll(); // Implémentez cette méthode dans chambreservice
             
             // Vider le JComboBox avant de le remplir
             chambre_Box.removeAllItems();
             
             // Ajouter chaque catégorie au JComboBox
-            for (Chambre c : chambres) {
+            for (Chambre c : a) {
                 chambre_Box.addItem(c.getnumero());
             }
         } catch (Exception e) {
@@ -59,14 +84,14 @@ public class ReservationForm extends javax.swing.JInternalFrame {
             private void remplirClientBox() {
         try {
             // Utilisation de chambreservice pour récupérer les catégories
-            clientservice x=new clientservice();
-            List<Client> clients = x.findAll(); // Implémentez cette méthode dans chambreservice
+            //clientservice y=new clientservice();
+            //List<Client> clients = y.findAll(); // Implémentez cette méthode dans chambreservice
             
             // Vider le JComboBox avant de le remplir
             client_Box.removeAllItems();
             
             // Ajouter chaque catégorie au JComboBox
-            for (Client cl : clients) {
+            for (Client cl : b) {
                 client_Box.addItem(cl.getCIN());
             }
         } catch (Exception e) {
@@ -122,6 +147,11 @@ public class ReservationForm extends javax.swing.JInternalFrame {
         });
 
         Modifier.setText("Modifier");
+        Modifier.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ModifierActionPerformed(evt);
+            }
+        });
 
         Supprimer.setText("Supprimer");
         Supprimer.addActionListener(new java.awt.event.ActionListener() {
@@ -207,21 +237,26 @@ public class ReservationForm extends javax.swing.JInternalFrame {
 
         listereservation.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Date debut", "Date fin", "Client - CIN", "Chambre - Numero"
+                "id", "Date debut", "Date fin", "Client - CIN", "Chambre - Numero"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
+            }
+        });
+        listereservation.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                listereservationMousePressed(evt);
             }
         });
         jScrollPane1.setViewportView(listereservation);
@@ -230,14 +265,14 @@ public class ReservationForm extends javax.swing.JInternalFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 469, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(76, 76, 76))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(31, 31, 31)
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(466, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 592, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -274,29 +309,168 @@ public class ReservationForm extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void SupprimerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SupprimerActionPerformed
-        // TODO add your handling code here:
+             if(DDEBUT_BOX.getDate() == null || DFIN_BOX.getDate() == null){JOptionPane.showMessageDialog(this, "veillez choisir une reservation depuit la liste", "Erreur", JOptionPane.ERROR_MESSAGE);}
+      else{
+        int reponse=JOptionPane.showConfirmDialog(this, "voulez vous vraiment supprimer cette reservation");
+        if(reponse==0){
+            if(rs.delete(rs.findById(id))){
+                JOptionPane.showMessageDialog(this,"la reservation a été bien supprimé");
+                load();
+            }
+            else{JOptionPane.showMessageDialog(this,"erreur de suppession de la reservation");}
+        }}
     }//GEN-LAST:event_SupprimerActionPerformed
 
     private void AjouterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AjouterActionPerformed
-              /* if (DDEBUT_BOX.getDate()==null || DFIN_BOX.getDate()==null) {
-        JOptionPane.showMessageDialog(this, "Tous les champs sont obligatoires.", "Erreur", JOptionPane.ERROR_MESSAGE);}
-       else{
-       Chambre o=new Chambre();
-       for(int i=0;i<a.size();i++){
-           Chambre c = a.get(i);
-           if(c.getCode().equals(Chambre_Categorie_Box.getSelectedItem())){
-           o=ce;
-           break;
-           }
-       }
- 
-        if(Chs.create(new Chambre(Numero_Box.getText(),Telephone_Box.getText(),o))){
-          JOptionPane.showMessageDialog(null, "Chambre ajoute ");
-          load();
-    }                                               
-        else{JOptionPane.showMessageDialog(null, "Ereeur de creation du chambre");}
-    }*/
+               // Vérification des champs obligatoires
+    if (DDEBUT_BOX.getDate() == null || DFIN_BOX.getDate() == null) {
+        JOptionPane.showMessageDialog(this, "Tous les champs sont obligatoires.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    } else {
+        // Création de l'objet Reservation
+        Reservation reservation = new Reservation();
+       reservation.setDatedebut(new java.sql.Date(DDEBUT_BOX.getDate().getTime()));
+       reservation.setDatefin(new java.sql.Date(DFIN_BOX.getDate().getTime()));
+
+
+        // Récupérer la chambre sélectionnée
+        Chambre chambreSelectionnee = null;
+        for (Chambre c : a) {
+            if (c.getnumero().equals(chambre_Box.getSelectedItem().toString())) {
+                chambreSelectionnee = c;
+                break;
+            }
+        }
+
+        // Vérifier si une chambre a été trouvée
+        if (chambreSelectionnee == null) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une chambre valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Récupérer le client sélectionné
+        Client clientSelectionne = null;
+        for (Client cl : b) {
+            if (cl.getCIN().equals(client_Box.getSelectedItem().toString())) {
+                clientSelectionne = cl;
+                break;
+            }
+        }
+
+        // Vérifier si un client a été trouvé
+        if (clientSelectionne == null) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un client valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Associer la chambre et le client à la réservation
+        reservation.setChambre(chambreSelectionnee);
+        reservation.setClient(clientSelectionne);
+
+        // Appeler la méthode de création
+        if (rs.create(reservation)) {
+            JOptionPane.showMessageDialog(null, "Réservation ajoutée avec succès !");
+            load(); // Recharger les données
+        } else {
+            JOptionPane.showMessageDialog(null, "Erreur lors de la création de la réservation.");
+        }
+    }
     }//GEN-LAST:event_AjouterActionPerformed
+
+    private void listereservationMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listereservationMousePressed
+         int row = listereservation.getSelectedRow();  // Récupérer la ligne sélectionnée dans la table
+    if (row != -1) {
+        // Récupérer les données de la ligne sélectionnée
+        id = (int) listereservation.getValueAt(row, 0);  
+        Date datedebut =  (Date)listereservation.getValueAt(row, 1);  
+        Date datefin = (Date)listereservation.getValueAt(row, 2);  
+        String chambrenumero = (String) listereservation.getValueAt(row, 3);
+        String clientcin = (String) listereservation.getValueAt(row, 4); 
+
+        // Remplir les champs de texte
+           DDEBUT_BOX.setDate(datedebut);
+        DFIN_BOX.setDate(datefin);
+        
+        //chambre
+        for (int i = 0; i < a.size(); i++) {
+            Chambre chambre = a.get(i);
+            if (chambre.getnumero().equals(chambrenumero)) {
+                chambre_Box.setSelectedItem(chambre.getnumero());
+                break;
+            }
+        }
+        //client
+         for (int i = 0; i < a.size(); i++) {
+            Client client = b.get(i);
+            if (client.getCIN().equals(clientcin)) {
+                client_Box.setSelectedItem(client.getCIN());
+                break;
+            }
+        }
+        
+    }
+    }//GEN-LAST:event_listereservationMousePressed
+
+    private void ModifierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ModifierActionPerformed
+       if (DDEBUT_BOX.getDate()==null|| DFIN_BOX.getDate()==null ) {
+        JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs, y compris la catégorie.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        return; // Arrêter l'exécution si des champs sont vides
+    }
+
+    // Récupérer les informations du formulaire
+    Date datedebut = (Date)DDEBUT_BOX.getDate();
+    Date datefin = (Date)DFIN_BOX.getDate();
+    
+    String numerochambre = (String) chambre_Box.getSelectedItem(); 
+    String cinclient = (String) client_Box.getSelectedItem(); 
+    // Trouver l'objet Categorie correspondant au code sélectionné
+    Chambre o = null;
+    for (int i = 0; i < a.size(); i++) {
+        Chambre ce = a.get(i);
+        if (ce.getnumero().equals(numerochambre)) {
+            o = ce; // Trouver la catégorie
+            break;
+        }
+    }
+      Client o1 = null;
+    for (int i = 0; i < b.size(); i++) {
+        Client c = b.get(i);
+        if (c.getCIN().equals(cinclient)) {
+            o1 = c; // Trouver la catégorie
+            break;
+        }
+    }
+
+    // Vérifier si la catégorie a été trouvée
+    if (o == null) {
+        JOptionPane.showMessageDialog(this, "chambre non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        return; // Si la catégorie n'est pas trouvée, arrêter l'exécution
+    }
+
+    // Trouver la chambre à modifier
+    System.out.println("ID de la resrevation à modifier : " + id); 
+    Reservation c = rs.findById(id);
+    if (c == null) {
+        JOptionPane.showMessageDialog(this, "reservation non trouvée.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Mettre à jour les informations de la chambre
+    c.setDatedebut(datedebut);
+    c.setDatefin(datefin);
+    c.setChambre(o);
+    c.setClient(o1);// Assigner la nouvelle catégorie
+
+    // Demander confirmation de la modification
+    int reponse = JOptionPane.showConfirmDialog(this, "Voulez-vous vraiment modifier cette resrvation?");
+    if (reponse == 0) { // Si l'utilisateur confirme
+        if (rs.update(c)) { // Mettre à jour la chambre dans la base de données
+            JOptionPane.showMessageDialog(this, "reservation bien modifiée");
+            load(); // Recharger les données ou actualiser l'affichage
+        } else {
+            JOptionPane.showMessageDialog(this, "Erreur de modification de la reservation", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_ModifierActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

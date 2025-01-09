@@ -40,14 +40,14 @@ public class clientservice implements IDAO<Client> {
 			ps.setString(2, o.getPrenom());
 			ps.setString(3, o.getTelephone());
 			ps.setString(4, o.getEmail());
-			ps.setString(4, o.getCIN());
-			ps.setInt(5, o.getId());
+			ps.setString(5, o.getCIN());
+			ps.setInt(6, o.getId());
 			if(ps.executeUpdate()==1) {
 				return true;
 			}
 			
 		} catch (SQLException e) {
-			System.out.println("Erreur update SQL");
+			System.out.println("Erreur update SQL"+ e);
 		}
 			return false;
 	}
